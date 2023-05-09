@@ -7,8 +7,7 @@ all of the codes are written in google app script
 誰が参加し不参加であるかも同時に通知する。
 
 ## google_calendar_to_spreadsheet.js
-2日前から、30日後までの予定をスプレッドシートに表示し、それぞれのイベントに対し出欠状況を一覧表示する
-
+2日前から、30日後までの予定と、それぞれの予定に対する出欠状況をスプレッドシートに一覧表示する
 
 ## variable.js
 メンバーの名簿、lineのapiトークンをここに書く
