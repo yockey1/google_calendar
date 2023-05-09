@@ -4,7 +4,7 @@ const calendarTitleMap = {
   };
   
   //line_groupが変わったときのみ変更
-  const token = PropertiesService.getScriptProperties().getProperty('test_token');
+  const token = PropertiesService.getScriptProperties().getProperty('line_api_token');
   
   //メンバーが変わったときのみ変更
   const memberList = [
