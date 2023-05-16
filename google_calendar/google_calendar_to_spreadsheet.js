@@ -1,7 +1,7 @@
 function getEvents() {
 
   createBlankSheetAndDeleteOthers();  // シートを削除
-  
+
   var mySheet = SpreadsheetApp.getActiveSheet(); // シートを取得  
   mySheet.clearContents();
   mySheet.clearFormats();
@@ -19,15 +19,15 @@ function getEvents() {
   var member = [];
 
   for (var i = 0; i < memberList.length; i++) {
-  member.push(memberList[i].name);
+    member.push(memberList[i].name);
   }
- 
+
   var headers = [
-  "イベントタイトル",
-];
+    "イベントタイトル",
+  ];
   for (var i = 0; i < member.length; i++) {
-  headers.push(member[i]);
-}
+    headers.push(member[i]);
+  }
 
   mySheet.appendRow(headers);
 
@@ -38,12 +38,15 @@ function getEvents() {
     var myEvents = calendar.getEvents(startDate, endDate);
 
     for (var evt of myEvents) {
+      let startTime = evt.getStartTime();
+      let dayOfWeek = WEEKDAY[startTime.getDay()];
       let rowData = [
-        evt.getStartTime().toISOString().substring(5, 10) + " " + evt.getTitle(),
+        startTime.getMonth() + 1 + "/" + startTime.getDate() + "(" + dayOfWeek + ")" + " " + evt.getTitle(),
       ];
       for (var i = 0; i < member.length; i++) {
         rowData.push("");
-    }
+      }
+
 
       let guests = evt.getGuestList();
       for (var guest of guests) {
@@ -53,7 +56,7 @@ function getEvents() {
 
         if (displayName) {
           switch (status) {
-            case CalendarApp.GuestStatus.YES:            
+            case CalendarApp.GuestStatus.YES:
               if (member.includes(displayName)) {
                 rowData[member.indexOf(displayName) + 1] = "〇";
               }
@@ -81,13 +84,13 @@ function getEvents() {
   }
   mySheet.setFrozenColumns(1);
   mySheet.setFrozenRows(1);
-  
+
   //var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();  
   //var commentSheet = spreadsheet.insertSheet('comment');
 }
 
 function getDisplayName(email) {
-  
+
   // メールアドレスに応じて表示名を返す
   for (var i = 0; i < memberList.length; i++) {
     if (email === memberList[i].email) {
@@ -104,10 +107,10 @@ function createBlankSheetAndDeleteOthers() {
   var sheets = spreadsheet.getSheets();
 
   for (var i = sheets.length - 1; i >= 0; i--) {
-      var sheet = sheets[i];
-      if (sheet.getName() !== "○○") {
-        spreadsheet.deleteSheet(sheet);
-      }
+    var sheet = sheets[i];
+    if (sheet.getName() !== "○○") {
+      spreadsheet.deleteSheet(sheet);
     }
+  }
 
 }
