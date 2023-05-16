@@ -73,7 +73,7 @@ function getEvents() {
               break;
             case CalendarApp.GuestStatus.INVITED:
               if (member.includes(displayName)) {
-                rowData[member.indexOf(displayName) + 1] = "?";
+                rowData[member.indexOf(displayName) + 1] = "未回答";
               }
               break;
           }
