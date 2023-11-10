@@ -11,7 +11,7 @@ function notifyEvent() {
 
     for (const event of events) {
 
-      /*      
+      /*
             ○○や△△がイベント名や詳細に含まれるときのみlineに通知したい場合
             const title = event.getTitle();
             const description = event.getDescription() || '';
@@ -89,7 +89,7 @@ function createMessage(event, tomorrow, calendarName) {
       }
     }
     // 該当するメールアドレスがない場合は空文字を返す
-    return `\n + ${ees}`;
+    return ``;
   }
 
 
