@@ -48,7 +48,7 @@ function getEvents() {
       }
 
 
-      let guests = evt.getGuestList();
+      let guests = evt.getGuestList(true);
       for (var guest of guests) {
         var email = guest.getEmail();
         var displayName = getDisplayName(email);
