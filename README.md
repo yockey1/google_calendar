@@ -1,6 +1,7 @@
 # google_calendar
 
 all of the codes are written in google app script
+For details on use, check wiki
 
 ## google_calendar_to_line.js
 次の日のgoogle calendarの予定を取得して、前日にlineに通知する。（gasでトリガーを設定する必要あり）
