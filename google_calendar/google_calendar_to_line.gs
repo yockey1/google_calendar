@@ -60,25 +60,25 @@ function createMessage(event, tomorrow, calendarName) {
     return attendant.getGuestStatus() === CalendarApp.GuestStatus.YES;
   }).map(function (attendant) {
     return getDisplayName(attendant.getEmail());
-  }).join(',');
+  }).filter(Boolean).join(',');
 
   let maybees = event.getGuestList().filter(function (attendant) {
     return attendant.getGuestStatus() === CalendarApp.GuestStatus.MAYBE;
   }).map(function (attendant) {
     return getDisplayName(attendant.getEmail());
-  }).join(',');
+  }).filter(Boolean).join(',');
 
   let absentees = event.getGuestList().filter(function (attendant) {
     return attendant.getGuestStatus() === CalendarApp.GuestStatus.NO;
   }).map(function (attendant) {
     return getDisplayName(attendant.getEmail());
-  }).join(',');
+  }).filter(Boolean).join(',');
 
   let invitees = event.getGuestList().filter(function (attendant) {
     return attendant.getGuestStatus() === CalendarApp.GuestStatus.INVITED;
   }).map(function (attendant) {
     return getDisplayName(attendant.getEmail());
-  }).join(',');
+  }).filter(Boolean).join(',');
 
   function getDisplayName(email) {
 
