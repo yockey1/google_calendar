@@ -56,7 +56,7 @@ function createMessage(event, tomorrow, calendarName) {
   let description = event.getDescription() ? `参考：\n${event.getDescription()}\n\n` : '';
   let text = `明日の${title}の参加可否に変更等ある人はリアクションをお願いします。\n参加👍遅刻😍欠席😭早退😲遅刻かつ早退😆`;
 
-  let attendees = event.getGuestList().filter(function (attendant) {
+  let attendees = event.getGuestList(true).filter(function (attendant) {
     return attendant.getGuestStatus() === CalendarApp.GuestStatus.YES;
   }).map(function (attendant) {
     return getDisplayName(attendant.getEmail());
@@ -88,8 +88,8 @@ function createMessage(event, tomorrow, calendarName) {
         return memberList[i].name;
       }
     }
-    // 該当するメールアドレスがない場合は空文字を返す
-    return ``;
+    // 該当するメールアドレスがない場合は空データを返す
+    return ;
   }
 
 
