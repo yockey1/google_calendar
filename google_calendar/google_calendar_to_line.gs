@@ -1,32 +1,32 @@
 function notifyEvent() {
-  const calendars = CalendarApp.getAllCalendars();
-  const tomorrow = getTomorrowFormatted();
+  const tomorrow = getTomorrow();
+  const formattedTomorrow = getFormattedDate(tomorrow);
 
-  for (const calendar of calendars) {
+  CalendarApp.getAllCalendars().forEach(calendar => {
     const calendarName = calendarTitleMap[calendar.getId()];
-    if (!calendarName) continue;
+    if (!calendarName) return;
 
-    const events = calendar.getEventsForDay(getTomorrow());
-    if (events.length === 0) continue;
+    const events = calendar.getEventsForDay(tomorrow);
+    if (events.length === 0) return;
 
-    for (const event of events) {
-
-      /*
-            ○○や△△がイベント名や詳細に含まれるときのみlineに通知したい場合
-            const title = event.getTitle();
-            const description = event.getDescription() || '';
-           console.log(description)
-            if (!title.includes('○○') && !description.includes('○○') && !title.includes('△△') && !description.includes('△△')) {
-              continue;
-            }
-      */
-
-      let message = createMessage(event, tomorrow, calendarName);
-      console.log(message);
-      sendToLine(message);
-    }
-  }
+    events.forEach(event => {
+      // if (shouldNotify(event)) {
+        const message = createMessage(event, formattedTomorrow, calendarName);
+        console.log(message);
+        sendToLine(message);
+      // }
+    });
+  });
 }
+//○○や△△がイベント名や詳細に含まれるときのみlineに通知したい場合
+// function shouldNotify(event) {
+//   const title = event.getTitle();
+//   const description = event.getDescription() || '';
+//   const keywords = ['○○', '△△'];
+
+//   return keywords.some(keyword => title.includes(keyword) || description.includes(keyword));
+// }
+
 function sendToLine(message) {
   const options = {
     method: 'post',
@@ -36,64 +36,31 @@ function sendToLine(message) {
 
   UrlFetchApp.fetch('https://notify-api.line.me/api/notify', options);
 }
+
 function getTomorrow() {
   const dt = new Date();
   dt.setDate(dt.getDate() + 1);
   return dt;
 }
 
-function getTomorrowFormatted() {
-  const dt = getTomorrow();
-  const weekdayIndex = dt.getDay();
-  const formattedDate = Utilities.formatDate(dt, 'Asia/Tokyo', `M/d(${WEEKDAY[weekdayIndex]})`);
-  return formattedDate;
+function getFormattedDate(date) {
+  const weekdayIndex = date.getDay();
+  return Utilities.formatDate(date, 'Asia/Tokyo', `M/d(${WEEKDAY[weekdayIndex]})`);
 }
 
 function createMessage(event, tomorrow, calendarName) {
-  let title = event.getTitle();
-  let time = `時間：${toTimeText(event.getStartTime())} - ${toTimeText(event.getEndTime())}`;
-  let location = event.getLocation() ? `場所：${event.getLocation()}\n\n` : '';
-  let description = event.getDescription() ? `参考：\n${event.getDescription()}\n\n` : '';
-  let text = `明日の${title}の参加可否に変更等ある人はリアクションをお願いします。\n参加👍遅刻😍欠席😭早退😲遅刻かつ早退😆`;
+  const title = event.getTitle();
+  const time = `時間：${toTimeText(event.getStartTime())} - ${toTimeText(event.getEndTime())}`;
+  const location = event.getLocation() ? `場所：${event.getLocation()}\n\n` : '';
+  const description = event.getDescription() ? `参考：\n${event.getDescription()}\n\n` : '';
+  const text = `明日の${title}の参加可否に変更等ある人はリアクションをお願いします。\n参加👍遅刻😍欠席😭早退😲遅刻かつ早退😆途中不在🙏`;
 
-  let attendees = event.getGuestList(true).filter(function (attendant) {
-    return attendant.getGuestStatus() === CalendarApp.GuestStatus.YES;
-  }).map(function (attendant) {
-    return getDisplayName(attendant.getEmail());
-  }).filter(Boolean).join(',');
+  const attendees = getAttendees(event, CalendarApp.GuestStatus.YES);
+  const maybees = getAttendees(event, CalendarApp.GuestStatus.MAYBE);
+  const absentees = getAttendees(event, CalendarApp.GuestStatus.NO);
+  const invitees = getAttendees(event, CalendarApp.GuestStatus.INVITED);
 
-  let maybees = event.getGuestList().filter(function (attendant) {
-    return attendant.getGuestStatus() === CalendarApp.GuestStatus.MAYBE;
-  }).map(function (attendant) {
-    return getDisplayName(attendant.getEmail());
-  }).filter(Boolean).join(',');
-
-  let absentees = event.getGuestList().filter(function (attendant) {
-    return attendant.getGuestStatus() === CalendarApp.GuestStatus.NO;
-  }).map(function (attendant) {
-    return getDisplayName(attendant.getEmail());
-  }).filter(Boolean).join(',');
-
-  let invitees = event.getGuestList().filter(function (attendant) {
-    return attendant.getGuestStatus() === CalendarApp.GuestStatus.INVITED;
-  }).map(function (attendant) {
-    return getDisplayName(attendant.getEmail());
-  }).filter(Boolean).join(',');
-
-  function getDisplayName(email) {
-
-    // メールアドレスに応じて表示名を返す
-    for (var i = 0; i < memberList.length; i++) {
-      if (email === memberList[i].email) {
-        return memberList[i].name;
-      }
-    }
-    // 該当するメールアドレスがない場合は空データを返す
-    return ;
-  }
-
-
-  let message1 = [
+  const message1 = [
     `【明日${tomorrow}の予定】\n`,
     `タイトル：${title}\n`,
     `${time}\n`,
@@ -102,20 +69,32 @@ function createMessage(event, tomorrow, calendarName) {
     `${text}`,
   ].join('');
 
-  let message2 = [
+  const message2 = [
     `参加: ${attendees}`,
     `欠席: ${absentees}`,
     `未定: ${maybees}`,
     `未回答: ${invitees}`
   ].join('\n');
 
-  let message = `<${calendarName}>\n\n${message1}\n\n${message2}`;
+  const message = `<${calendarName}>\n\n${message1}\n\n${message2}`;
 
-  if (calendarName) {
-    return message;
-  }
+  return message;
+}
 
-  function toTimeText(str) {
-    return Utilities.formatDate(str, 'Asia/Tokyo', 'HH:mm');
-  }
+function toTimeText(str) {
+  return Utilities.formatDate(str, 'Asia/Tokyo', 'HH:mm');
+}
+
+function getAttendees(event, status) {
+  return event.getGuestList()
+    .filter(attendant => attendant.getGuestStatus() === status)
+    .map(attendant => getDisplayName(attendant.getEmail()))
+    .filter(Boolean)
+    .join(',');
+}
+
+// メールアドレスに応じて表示名を返す
+function getDisplayName(email) {
+  const member = memberList.find(member => member.email === email);
+  return member ? member.name : '';  //該当するメールアドレスがない場合は空データを返す
 }
